@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SaldoKita</title>
+
+<!-- FONT -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+/* ========================
+   VARIABEL GLOBAL (Mudah diubah)
+   ======================== */
+:root{
+  --hijau:#38ef7d;        /* warna hijau terang */
+  --hijauTua:#11998e;     /* warna hijau tua / gradient */
+  --bg:#f8fafc;            /* background utama */
+  --card:#ffffff;          /* background card */
+  --text:#0f172a;          /* warna teks */
+  --border:#1f2937;        /* border input/button */
+}
+
+/* MODE GELAP (dark mode) */
+body.dark{
+  --bg:#0f172a;
+  --card:#020617;
+  --text:#f8fafc;
+  --border:#334155;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:var(--bg);
+  font-family:'Poppins',sans-serif;
+  color:var(--text);
+}
+
+/* ========================
+   SPLASH SCREEN
+   ======================== */
+#loading{
+  position:fixed;
+  inset:0;
+  background:linear-gradient(135deg,#43cea2,#185a9d);
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  color:white;
+  z-index:999;
+  gap:15px;
+}
+
+/* ========================
+   APP UTAMA
+   ======================== */
+.app{
+  width:390px;
+  background:rgba(255,255,255,.15);
+  backdrop-filter:blur(20px);
+  border-radius:30px;
+  overflow:hidden;
+  display:none;
+}
+
+/* ========================
+   HEADER
+   ======================== */
+.header{
+  padding:20px;
+  background:linear-gradient(135deg,var(--hijauTua),var(--hijau));
+  color:white;
+}
+.header-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.logo{
+  display:flex;
+  gap:10px;
+  align-items:center;
+}
+.logo img{
+  width:45px;
+  height:45px;
+  border-radius:8px;
+}
+
+/* MODE SWITCH BUTTON */
+.switch{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  border:none;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  background:rgba(255,255,255,.3);
+  transition:0.5s;
+}
+.switch:active{transform:scale(.9)}
+
+/* ========================
+   SALDO
+   ======================== */
+.saldo{
+  margin:15px;
+  background:var(--card);
+  border-radius:20px;
+  padding:15px;
+  text-align:center;
+}
+
+/* ========================
+   CONTENT / FORM INPUT
+   ======================== */
+.content{
+  padding:20px;
+  background:var(--card);
+  border-radius:30px 30px 0 0;
+}
+input,button{
+  width:100%;
+  padding:13px 16px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  margin-bottom:12px;
+  font-size:14px;
+  box-sizing:border-box;
+  background:var(--card);
+  color:var(--text);
+}
+input:focus{
+  border-color:#22c55e;
+  box-shadow:0 0 0 2px rgba(34,197,94,.2);
+  outline:none;
+}
+button{
+  background:linear-gradient(135deg,var(--hijauTua),var(--hijau));
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+  border:none;
+}
+button.admin{background:#334155}
+
+/* ========================
+   RIWAYAT / LIST ITEM
+   ======================== */
+.item{
+  display:flex;
+  justify-content:space-between;
+  background:#f1f5f9;
+  padding:12px;
+  border-radius:12px;
+  margin-bottom:8px;
+}
+
+/* ========================
+   POPUP
+   ======================== */
+#popup{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+}
+.popup-box{
+  background:white;
+  padding:30px;
+  border-radius:25px;
+  text-align:center;
+  animation:pop .3s ease;
+}
+@keyframes pop{
+  from{transform:scale(.6);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
+/* ========================
+   WATERMARK
+   ======================== */
+.watermark{
+  text-align:center;
+  font-size:11px;
+  color:#94a3b8;
+  margin-top:15px;
+}
+</style>
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<div id="loading">
+  <img src="logo.png" style="width:90px;height:90px;border-radius:20px">
+  <h2>SaldoKita</h2>
+  <small>developed by nusantara_exp</small>
+</div>
+
+<!-- APP UTAMA -->
+<div class="app" id="app">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-row">
+      <div class="logo">
+        <img src="logo.png">
+        <div>
+          <b>SaldoKita</b><br>
+          <small>Menabung untuk masa depan</small>
+        </div>
+      </div>
+      <button class="switch" onclick="toggleTheme()">🌙</button>
+    </div>
+  </div>
+
+  <!-- SALDO -->
+  <div class="saldo">
+    <small>Saldo Bersama</small>
+    <h2 id="total">Rp 0</h2>
+  </div>
+
+  <!-- FORM INPUT -->
+  <div class="content">
+    <input id="inpNama" placeholder="Nama penyetor">
+    <input id="inpJumlah" placeholder="Jumlah (Rp)" oninput="formatNominal(this)">
+    <input id="inpTanggal" type="date" hidden>
+
+    <button onclick="tambah()">Tambah Tabungan</button>
+    <button class="admin" onclick="lihatRiwayat()">Lihat Riwayat (Admin)</button>
+    <button class="admin" onclick="resetData()">Reset Data (Admin)</button>
+
+    <div id="list"></div>
+    <div class="watermark">developed by <b>nusantara_exp</b></div>
+  </div>
+</div>
+
+<!-- POPUP -->
+<div id="popup">
+  <div class="popup-box">
+    <h2 id="popupText">Berhasil!</h2>
+  </div>
+</div>
+
+<!-- ========================
+     JAVASCRIPT
+     ======================== -->
+<script>
+// ------------------------
+// ADMIN PIN (mudah diubah)
+const ADMIN_PIN = "1234";
+
+// ------------------------
+// THEME / MODE GELAP
+function toggleTheme(){
+  let t = document.body.classList.contains("dark") ? "" : "dark";
+  document.body.className = t;
+  localStorage.setItem("theme", t);
+}
+// Load theme dari storage
+document.body.className = localStorage.getItem("theme") || "";
+
+// ------------------------
+// DATA SALDO
+let data = JSON.parse(localStorage.getItem("saldoKita")) || [];
+const ucapan = ["Mantap! 💪","Saldo bertambah ✨","Keren! 🔥","Disiplin 👍","Sedikit demi sedikit 💰"];
+
+// ------------------------
+// UTILITIES
+function setTanggal(){ inpTanggal.value = new Date().toISOString().split("T")[0]; }
+function formatNominal(el){
+  let v = el.value.replace(/\D/g,"");
+  el.value = v.replace(/\B(?=(\d{3})+(?!\d))/g,".");
+}
+function getNominal(){ return parseInt(inpJumlah.value.replace(/\./g,"")) || 0; }
+function updateSaldo(){
+  let t = data.reduce((a,b) => a + b.jumlah, 0);
+  total.innerText = "Rp " + t.toLocaleString("id-ID");
+}
+function showPopup(){
+  popupText.innerText = ucapan[Math.floor(Math.random()*ucapan.length)];
+  popup.style.display = "flex";
+  setTimeout(()=>popup.style.display="none",1200);
+}
+
+// ------------------------
+// ACTIONS
+function tambah(){
+  if(!inpNama.value || !getNominal()) return alert("Lengkapi data");
+  data.push({nama:inpNama.value, jumlah:getNominal(), tanggal:inpTanggal.value});
+  localStorage.setItem("saldoKita", JSON.stringify(data));
+  inpNama.value = "";
+  inpJumlah.value = "";
+  setTanggal();
+  updateSaldo();
+  showPopup();
+}
+
+function lihatRiwayat(){
+  if(prompt("Sandi admin:") !== ADMIN_PIN) return alert("Salah");
+  list.innerHTML = "";
+  data.forEach(d=>{
+    list.innerHTML += `<div class="item"><span>${d.nama}</span><b>Rp ${d.jumlah.toLocaleString("id-ID")}</b></div>`;
+  });
+}
+
+function resetData(){
+  if(prompt("Sandi admin:") !== ADMIN_PIN) return alert("Salah");
+  if(confirm("Hapus semua data?")){
+    data = [];
+    localStorage.removeItem("saldoKita");
+    list.innerHTML = "";
+    updateSaldo();
+  }
+}
+
+// ------------------------
+// INIT
+setTimeout(()=>{
+  loading.style.display="none";
+  app.style.display="block";
+  setTanggal();
+  updateSaldo();
+}, 3000); // splash 1 detik
+</script>
+
+</body>
+</html>
